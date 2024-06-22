@@ -12,6 +12,7 @@ func setupHTTPRouter(ac *apiConfig) *http.ServeMux {
 	r.HandleFunc("GET /feed_follows", ac.middlewareAuth(ac.getFeedFollowsHandler))
 	r.HandleFunc("POST /feed_follows", ac.middlewareAuth(ac.createFeedFollowsHandler))
 	r.HandleFunc("DELETE /feed_follows/{id}", ac.middlewareAuth(ac.deleteFeedFollowHandler))
+	r.HandleFunc("GET /posts", ac.middlewareAuth(ac.getPostsForUserHandler))
 
 	return r
 }

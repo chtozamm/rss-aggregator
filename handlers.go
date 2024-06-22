@@ -149,3 +149,17 @@ func (ac *apiConfig) deleteFeedFollowHandler(w http.ResponseWriter, r *http.Requ
 
 	respondWithJSON(w, http.StatusOK, nil)
 }
+
+func (ac *apiConfig) getPostsForUserHandler(w http.ResponseWriter, r *http.Request, user database.User) {
+	posts, err := ac.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  10,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, printErr("Failed to get posts", err))
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, posts)
+}
