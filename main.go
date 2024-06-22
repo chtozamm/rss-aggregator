@@ -18,7 +18,7 @@ type apiConfig struct {
 func main() {
 	// Load environmental variables
 	if err := parseEnv(".env"); err != nil {
-		log.Fatalf("Failed to parse env file: %s", err)
+		log.Fatalf(printErr("Failed to parse .env file", err))
 	}
 
 	port := os.Getenv("PORT")
@@ -33,14 +33,17 @@ func main() {
 
 	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %s", err)
+		log.Fatal(printErr("Failed to connect to the database", err))
 	}
 
-	apiCfg := apiConfig{DB: database.New(conn)}
+	ac := apiConfig{DB: database.New(conn)}
 
 	// Setup http router
-	r := setupHTTPRouter(&apiCfg)
+	r := setupHTTPRouter(&ac)
 
 	log.Println("Server is listening on http://localhost:" + port)
-	http.ListenAndServe("localhost:"+port, r)
+	err = http.ListenAndServe("localhost:"+port, r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

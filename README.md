@@ -1,6 +1,6 @@
 # RSS Aggregator
 
-RSS Aggregator written in Go. Features database, authentication.
+RSS Aggregator written in Go with minimum dependencies. Features database, authentication.
 
 ## Setup
 

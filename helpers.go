@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -52,9 +53,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 	w.Write(data)
 }
 
-func respondWithError(w http.ResponseWriter, code int, msg string) {
+func respondWithError(w http.ResponseWriter, code int, err string) {
 	if code > 499 {
-		log.Println("Responding with 5XX error:", msg)
+		log.Println("Server-side error:", err)
 	}
 
 	type errResponse struct {
@@ -62,6 +63,10 @@ func respondWithError(w http.ResponseWriter, code int, msg string) {
 	}
 
 	respondWithJSON(w, code, errResponse{
-		Error: msg,
+		Error: err,
 	})
+}
+
+func printErr(message string, err error) string {
+	return fmt.Sprint(message, ":", err.Error())
 }
