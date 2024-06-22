@@ -1,6 +1,15 @@
 # RSS Aggregator
 
+RSS Aggregator written in Go. Features database, authentication.
+
 ## Setup
+
+### Environmental Variables
+
+```env
+PORT=   # Port on which server will be listening
+DB_URL= # Database connection string (i.e. postgres://user:password@localhost:5432/rss-aggregator?sslmode=disable)
+```
 
 ### Database
 

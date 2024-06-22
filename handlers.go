@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/chtozamm/rss-aggregator/internal/auth"
 	"github.com/chtozamm/rss-aggregator/internal/database"
 	"github.com/google/uuid"
 )
@@ -47,32 +47,21 @@ func (apiCfg *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, insertedUser)
+	respondWithJSON(w, http.StatusCreated, insertedUser)
 }
 
-func respondWithJSON(w http.ResponseWriter, code int, payload any) {
-	data, err := json.Marshal(payload)
+func (apiCfg *apiConfig) getUserHandler(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
 	if err != nil {
-		log.Printf("Failed to marshal JSON response: %+v", payload)
-		w.WriteHeader(http.StatusInternalServerError)
+		respondWithError(w, http.StatusForbidden, fmt.Sprintf("Authentication error: %s", err))
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(data)
-}
-
-func respondWithError(w http.ResponseWriter, code int, msg string) {
-	if code > 499 {
-		log.Println("Responding with 5XX error:", msg)
+	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("User not found: %s", err))
+		return
 	}
 
-	type errResponse struct {
-		Error string `json:"error"`
-	}
-
-	respondWithJSON(w, code, errResponse{
-		Error: msg,
-	})
+	respondWithJSON(w, http.StatusOK, user)
 }

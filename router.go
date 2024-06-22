@@ -9,6 +9,7 @@ func setupHTTPRouter(ac *apiConfig) *http.ServeMux {
 	r.HandleFunc("GET /health", checkHealthHandler)
 	r.HandleFunc("GET /error", errorHandler)
 	r.HandleFunc("POST /users", ac.createUserHandler)
+	r.HandleFunc("GET /users", ac.getUserHandler)
 
 	return r
 }
