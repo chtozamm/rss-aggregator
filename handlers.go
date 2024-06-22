@@ -81,3 +81,71 @@ func (ac *apiConfig) getFeedsHandler(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, feeds)
 }
+
+func (ac *apiConfig) createFeedFollowsHandler(w http.ResponseWriter, r *http.Request, user database.User) {
+	type params struct {
+		FeedID uuid.UUID `json:"feed_id"`
+	}
+
+	p := params{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&p)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, printErr("Failed to decode request body", err))
+		return
+	}
+
+	feedFollows, err := ac.DB.CreateFeedFollows(r.Context(), database.CreateFeedFollowsParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    user.ID,
+		FeedID:    p.FeedID,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, printErr("Failed to create new feed follows", err))
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, feedFollows)
+}
+
+func (ac *apiConfig) getFeedFollowsHandler(w http.ResponseWriter, r *http.Request, user database.User) {
+	feeds, err := ac.DB.GetFeedFollows(r.Context(), user.ID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, printErr("Failed to get feeds", err))
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, feeds)
+}
+
+func (ac *apiConfig) deleteFeedFollowHandler(w http.ResponseWriter, r *http.Request, user database.User) {
+	feedIDStr := r.PathValue("id")
+	if feedIDStr == "" {
+		respondWithError(w, http.StatusBadRequest, printErr("Invalid feed id", nil))
+		return
+	}
+
+	feedID, err := uuid.Parse(feedIDStr)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, printErr("Failed to parse feed id", err))
+		return
+	}
+
+	type params struct {
+		FeedID uuid.UUID `json:"feed_id"`
+	}
+
+	err = ac.DB.DeleteFeedFollow(r.Context(), database.DeleteFeedFollowParams{
+		ID:     feedID,
+		UserID: user.ID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, printErr("Failed to delete feed", err))
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, nil)
+}

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/chtozamm/rss-aggregator/internal/database"
 
@@ -36,10 +37,13 @@ func main() {
 		log.Fatal(printErr("Failed to connect to the database", err))
 	}
 
-	ac := apiConfig{DB: database.New(conn)}
+	db := database.New(conn)
+	ac := apiConfig{DB: db}
 
 	// Setup http router
 	r := setupHTTPRouter(&ac)
+
+	go startScraping(db, 10, time.Minute)
 
 	log.Println("Server is listening on http://localhost:" + port)
 	err = http.ListenAndServe("localhost:"+port, r)

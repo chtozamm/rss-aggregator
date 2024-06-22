@@ -48,9 +48,11 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(data)
+	if data != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(data)
+	}
 }
 
 func respondWithError(w http.ResponseWriter, code int, err string) {
@@ -68,5 +70,8 @@ func respondWithError(w http.ResponseWriter, code int, err string) {
 }
 
 func printErr(message string, err error) string {
-	return fmt.Sprint(message, ":", err.Error())
+	if err == nil {
+		return fmt.Sprint(message)
+	}
+	return fmt.Sprint(message, ": ", err.Error())
 }
