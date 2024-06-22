@@ -17,8 +17,8 @@ func parseEnv(filename string) error {
 
 	scanner := bufio.NewScanner(envFile)
 	for scanner.Scan() {
-		envVar := strings.Split(scanner.Text(), "=")
-		os.Setenv(strings.Trim(envVar[0], " "), strings.Trim(envVar[1], " "))
+		envVar := strings.SplitN(scanner.Text(), "=", 2)
+		os.Setenv(purifyString(envVar[0]), purifyString(envVar[1]))
 	}
 
 	if err = scanner.Err(); err != nil {
@@ -26,4 +26,12 @@ func parseEnv(filename string) error {
 	}
 
 	return nil
+}
+
+// purifyString is a helper function that trims leading and trailing spaces spaces and removes quotation marks from a given string.
+func purifyString(s string) string {
+	s = strings.Trim(s, " ")
+	s = strings.ReplaceAll(s, "\"", "")
+	s = strings.ReplaceAll(s, "'", "")
+	return s
 }
